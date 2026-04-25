@@ -1,0 +1,36 @@
+name: discover_artifical_intelligence
+channels:
+  - pytorch
+  - nvidia
+  - conda-forge
+  - defaults
+dependencies:
+  - python=3.10
+  - pip
+  - pytorch=2.4.*
+  - torchvision
+  - torchaudio
+  - pytorch-cuda=12.1
+  - numpy<2
+  - pandas
+  - scikit-learn
+  - scipy
+  - matplotlib
+  - seaborn
+  - tqdm
+  - pyyaml
+  - pillow
+  - ffmpeg
+  - pip:
+      - opencv-python==4.9.*
+      - opencv-contrib-python==4.9.*
+      - facenet-pytorch==2.5.*
+      - timm==1.0.*
+      - transformers==4.44.*
+      - decord==0.6.0
+      - einops
+      - torchmetrics==1.4.*
+      - tensorboard
+      - statsmodels
+      - mlxtend
+      - av

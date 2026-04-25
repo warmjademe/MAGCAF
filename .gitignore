@@ -1,0 +1,30 @@
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+*.egg-info/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# data + caches (too large for git)
+runs/
+logs/
+data_cache/
+feat_cache/
+face_cache/
+*.npy
+*.npz
+*.pth
+*.pt
+*.ckpt
+
+# IDE / editor
+.vscode/
+.idea/
+.DS_Store
+
+# environment
+.env
+*.log
