@@ -43,7 +43,8 @@ from models.build import build_model                              # noqa: E402
 
 # All models train on cached frozen features (linear-probe-style protocol).
 FEATURE_MODELS = {"magcaf", "ours", "magcaf_v2",
-                  "timesformer", "videomae", "resnet_tcn", "lrcn"}
+                  "timesformer", "videomae", "resnet_tcn", "lrcn",
+                  "vibednet", "vibed_net", "vibed-net"}
 TRANSFORMER_CACHED = {"timesformer", "videomae"}
 
 # Minimal dataset feature set per model (saves I/O)
@@ -55,6 +56,9 @@ FEATURES_WANTED = {
     "videomae":    ("videomae",),
     "resnet_tcn":  ("spatial",),
     "lrcn":        ("spatial",),
+    "vibednet":    ("effnetv2_face", "effnetv2_scene"),
+    "vibed_net":   ("effnetv2_face", "effnetv2_scene"),
+    "vibed-net":   ("effnetv2_face", "effnetv2_scene"),
 }
 
 
@@ -86,6 +90,11 @@ def forward_model(model, batch, mode, device, model_name: str) -> torch.Tensor:
     if model_name in ("resnet_tcn", "lrcn"):
         spatial = batch["spatial"].to(device, non_blocking=True)
         return model(spatial)
+
+    if model_name in ("vibednet", "vibed_net", "vibed-net"):
+        face = batch["effnetv2_face"].to(device, non_blocking=True)
+        scene = batch["effnetv2_scene"].to(device, non_blocking=True)
+        return model(face, scene)
 
     # MAGCAF: 4-source heterogeneous fusion
     spatial = batch["spatial"].to(device, non_blocking=True)

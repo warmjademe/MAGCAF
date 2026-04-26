@@ -9,6 +9,10 @@ Models exposed:
     videomae     -- VideoMAE   (Tong   2022), frozen + adapter.
     resnet_tcn   -- ResNet-TCN (Abedi & Khan 2021).
     lrcn         -- LRCN       (Donahue 2015 / DAiSEE benchmark, Gupta 2016).
+    vibednet     -- ViBED-Net  (Gothwal 2025): dual-stream EfficientNetV2-S
+                    over face crops and full-scene frames, per-stream LSTM,
+                    late-fusion concat. Adapted to our 4-task multi-task
+                    protocol (alias: vibed_net, vibed-net).
 
 All models consume 16 uniformly-sampled frames per clip.
 """
@@ -45,5 +49,8 @@ def build_model(name: str, **kwargs: Any) -> nn.Module:
     if name == "lrcn":
         from .baseline_engagement import LRCNModel
         return LRCNModel(**mcfg)
+    if name in ("vibednet", "vibed_net", "vibed-net"):
+        from .baseline_vibednet import ViBEDNetModel
+        return ViBEDNetModel(**mcfg)
 
     raise ValueError(f"Unknown model name: {name}")

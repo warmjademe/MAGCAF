@@ -165,9 +165,11 @@ class DAiSEEDataset(Dataset):
                 flow_stacks[:, 0::2] = -flow_stacks[:, 0::2]
             out["flow"] = torch.from_numpy(flow_stacks)
 
-        for tag in ("timesformer", "videomae", "flow_feat", "landmark_seq"):
+        for tag in ("timesformer", "videomae", "flow_feat", "landmark_seq",
+                    "effnetv2_face", "effnetv2_scene"):
             if tag in wants:
-                # On disk: <ClipID>_{timesformer,videomae,flow,landmarks}.npy
+                # On disk: <ClipID>_{timesformer,videomae,flow,landmarks,
+                #                    effnetv2_face,effnetv2_scene}.npy
                 disk_tag = {
                     "flow_feat": "flow",
                     "landmark_seq": "landmarks",
