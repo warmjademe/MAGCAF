@@ -103,9 +103,10 @@ reporting. The 57.20% figure above is what the same dual-stream
 EfficientNetV2-S + LSTM architecture produces under our unified four-task
 multi-task protocol with T=16, 20 epochs, no aggressive augmentation, and
 3-seed mean ± std reporting. The drop is the expected cost of protocol
-control; under the unified protocol ViBED-Net (2025) ranks below the
-2021/2022 video Transformers, empirically refuting the assumption that newer
-DAiSEE-engagement-specific designs would automatically displace MAGCAF.
+control; under the unified protocol ViBED-Net (2025) sits below the
+2021/2022 video Transformers, suggesting that on this benchmark aggregate
+performance depends jointly on the choice of backbone and on training-protocol
+details rather than on backbone recency alone.
 
 Component ablation (within MAGCAF, 3-seed mean):
 
