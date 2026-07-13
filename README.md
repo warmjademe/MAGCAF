@@ -160,6 +160,29 @@ for ab in omega_fixed omega_noreg; do
 done
 ```
 
+Frame-sampling check (Table 2 of the paper): leading window (first 16) vs
+uniform-16 across the clip; single seed 42; one third of train/val (identical
+in both arms); full test set; McNemar paired test. Scripts under
+`experiments/frame_sampling_check/`:
+
+```bash
+export SAMPLING_CHECK_ROOT=/path/to/uni16
+python experiments/frame_sampling_check/build_shadow_subset.py
+python experiments/frame_sampling_check/preprocess_uniform16.py
+HF_HUB_OFFLINE=1 python -m data.extract_features             --face-cache $SAMPLING_CHECK_ROOT/face_cache --out-dir $SAMPLING_CHECK_ROOT/feat_cache
+HF_HUB_OFFLINE=1 python -m data.extract_transformer_features --face-cache $SAMPLING_CHECK_ROOT/face_cache --out-dir $SAMPLING_CHECK_ROOT/feat_cache
+python -m data.extract_landmark_features                     --face-cache $SAMPLING_CHECK_ROOT/face_cache --out-dir $SAMPLING_CHECK_ROOT/feat_cache
+# arm B: DAISEE_ROOT=$SAMPLING_CHECK_ROOT/shadow_root DAISEE_FACE_CACHE=$SAMPLING_CHECK_ROOT/face_cache
+# arm A: same DAISEE_ROOT, original DAISEE_FACE_CACHE; then:
+python experiments/frame_sampling_check/compare_arms.py
+```
+
+| Model | Avg Acc f16/u16 | Macro-F1 f16/u16 | AUC f16/u16 | McNemar p |
+|---|---|---|---|---|
+| MAGCAF | 59.19 / 58.84 | 0.282 / 0.272 | 0.635 / 0.580 | 0.433 |
+| TimeSformer | 60.57 / 61.07 | 0.262 / 0.272 | 0.644 / 0.641 | 0.156 |
+| VideoMAE | 60.66 / 61.24 | 0.261 / 0.263 | 0.623 / 0.623 | 0.147 |
+
 ## Citation
 
 If you use this code, please cite our paper.
