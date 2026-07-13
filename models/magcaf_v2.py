@@ -236,7 +236,8 @@ class _TaskAgnosticFusion(_MultiSourceFusion):
 
 class MAGCAFv2Net(nn.Module):
     VALID_ABLATES = (None, "no_magcaf", "no_omega", "no_uw",
-                     "avg_fusion", "ta_fusion")
+                     "avg_fusion", "ta_fusion",
+                     "omega_fixed", "omega_noreg")
 
     def __init__(self, cfg: MAGCAFv2Config | None = None,
                  omega_prior: torch.Tensor | None = None,
@@ -317,6 +318,10 @@ class MAGCAFv2Net(nn.Module):
         self.omega_head = (None if (ablate and "no_omega" in ablate)
                            else OmegaHead(cfg.num_tasks, cfg.num_classes,
                                           omega_prior=omega_prior))
+        if self.omega_head is not None and ablate == "omega_noreg":
+            self.omega_head.reg_lambda = 0.0
+        elif self.omega_head is not None and ablate == "omega_fixed":
+            self.omega_head.omega.requires_grad_(False)
         self.uw = (None if (ablate and "no_uw" in ablate)
                    else UncertaintyWeighter(cfg.num_tasks))
 

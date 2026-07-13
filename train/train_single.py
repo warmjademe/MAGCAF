@@ -292,6 +292,12 @@ def main():
     log.info("Dumped metrics + predictions to %s", args.run_dir)
 
     # Optional: dump per-task source-attention gates on the test set for RQ3.
+    if getattr(model, "omega_head", None) is not None:
+        np.save(os.path.join(args.run_dir, "omega_learned.npy"),
+                model.omega_head.omega.detach().cpu().numpy())
+        np.save(os.path.join(args.run_dir, "omega_prior.npy"),
+                model.omega_head.omega_prior.detach().cpu().numpy())
+
     if args.save_gates and args.model.lower() in ("magcaf", "magcaf_v2", "ours"):
         log.info("Extracting per-task source attention gates on test set...")
         model.eval()

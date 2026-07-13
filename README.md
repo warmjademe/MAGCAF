@@ -140,6 +140,26 @@ done
 # lrcn__ce / timesformer__ce / videomae__ce runs and re-score.
 ```
 
+Ω-head analysis (Tables 5–6 of the paper). Every run dumps
+`omega_prior.npy` / `omega_learned.npy` next to its predictions; the two
+extra ablations are:
+
+| Ω configuration | Avg Acc | Macro-F1 | macro-AUC |
+|---|---|---|---|
+| Fixed at prior (`--ablate omega_fixed`) | 60.13 ± 0.85 | 0.289 ± 0.004 | 0.629 ± 0.011 |
+| Unregularised, λ=0 (`--ablate omega_noreg`) | 59.30 ± 0.62 | 0.285 ± 0.009 | 0.621 ± 0.003 |
+| Removed (`--ablate no_omega`) | 58.87 ± 0.38 | 0.285 ± 0.011 | 0.620 ± 0.012 |
+
+```bash
+for ab in omega_fixed omega_noreg; do
+  for s in 42 123 2024; do
+    python -m train.train_single --model magcaf_v2 --loss ce --ablate $ab \
+      --model-cfg use_landmark=True --seed $s --epochs 20 \
+      --run-dir runs/pilot/${ab}__s${s}
+  done
+done
+```
+
 ## Citation
 
 If you use this code, please cite our paper.
