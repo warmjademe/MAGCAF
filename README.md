@@ -123,15 +123,15 @@ feature bank and protocol, only the fusion operator differs):
 | Fusion | Avg Acc | Macro-F1 | macro-AUC |
 |---|---|---|---|
 | Concatenation (= −M1, `--ablate no_magcaf`) | 60.44 ± 0.64 | 0.277 ± 0.006 | 0.649 ± 0.003 |
-| Average fusion (`--ablate avg_fusion`) | 45.17 ± 4.55 | 0.295 ± 0.017 | 0.623 ± 0.006 |
-| Task-agnostic fusion (`--ablate ta_fusion`) | 48.43 ± 2.53 | 0.297 ± 0.010 | 0.612 ± 0.004 |
+| Average fusion (`--ablate avg_fusion`) | 60.73 ± 0.37 | 0.288 ± 0.004 | 0.648 ± 0.001 |
+| Task-agnostic fusion (`--ablate ta_fusion`) | 58.66 ± 0.30 | 0.287 ± 0.013 | 0.623 ± 0.009 |
 | Late fusion (probability averaging) | 62.17 ± 0.25 | 0.261 ± 0.003 | 0.647 ± 0.001 |
 
 ```bash
 # average / task-agnostic fusion
 for ab in avg_fusion ta_fusion; do
   for s in 42 123 2024; do
-    python -m train.train_single --model magcaf_v2 --ablate $ab \
+    python -m train.train_single --model magcaf_v2 --loss ce --ablate $ab \
       --model-cfg use_landmark=True --seed $s --epochs 20 \
       --run-dir runs/pilot/fusion_${ab}__s${s}
   done
