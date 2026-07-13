@@ -1,4 +1,4 @@
-# MAGCAF: Modality-Adaptive Gated Cross-Attention Fusion
+# MAGCAF: Multi-Source Affective Gated Cross-Attention Fusion
 
 Reference implementation of the MAGCAF model for fine-grained student-engagement
 recognition on the [DAiSEE](https://people.iith.ac.in/vineethnb/resources/daisee/index.html)
@@ -117,7 +117,7 @@ Component ablation (within MAGCAF, 3-seed mean):
 | − M2 (Ω task-correlation head) | 58.87 ± 0.38 | 0.285 ± 0.011 | 0.620 ± 0.012 |
 | − M3 (Kendall–Gal uncertainty weighting) | 59.66 ± 0.80 | 0.281 ± 0.005 | 0.631 ± 0.016 |
 
-Simple multi-source fusion baselines (Table 2, middle block; same four-source
+Simple multi-source fusion baselines (Table 3, middle block; same four-source
 feature bank and protocol, only the fusion operator differs):
 
 | Fusion | Avg Acc | Macro-F1 | macro-AUC |
@@ -140,7 +140,7 @@ done
 # lrcn__ce / timesformer__ce / videomae__ce runs and re-score.
 ```
 
-Ω-head analysis (Tables 5–6 of the paper). Every run dumps
+Ω-head analysis (Tables 6–7 of the paper). Every run dumps
 `omega_prior.npy` / `omega_learned.npy` next to its predictions; the two
 extra ablations are:
 

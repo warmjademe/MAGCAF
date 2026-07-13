@@ -1,4 +1,4 @@
-"""MAGCAF: Modality-Adaptive Gated Cross-Attention Fusion.
+"""MAGCAF: Multi-Source Affective Gated Cross-Attention Fusion.
 
 Task-conditioned multi-source heterogeneous fusion of four frozen pretrained
 sources, each producing complementary representations of the same DAiSEE
