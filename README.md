@@ -117,6 +117,29 @@ Component ablation (within MAGCAF, 3-seed mean):
 | − M2 (Ω task-correlation head) | 58.87 ± 0.38 | 0.285 ± 0.011 | 0.620 ± 0.012 |
 | − M3 (Kendall–Gal uncertainty weighting) | 59.66 ± 0.80 | 0.281 ± 0.005 | 0.631 ± 0.016 |
 
+Simple multi-source fusion baselines (Table 2, middle block; same four-source
+feature bank and protocol, only the fusion operator differs):
+
+| Fusion | Avg Acc | Macro-F1 | macro-AUC |
+|---|---|---|---|
+| Concatenation (= −M1, `--ablate no_magcaf`) | 60.44 ± 0.64 | 0.277 ± 0.006 | 0.649 ± 0.003 |
+| Average fusion (`--ablate avg_fusion`) | 45.17 ± 4.55 | 0.295 ± 0.017 | 0.623 ± 0.006 |
+| Task-agnostic fusion (`--ablate ta_fusion`) | 48.43 ± 2.53 | 0.297 ± 0.010 | 0.612 ± 0.004 |
+| Late fusion (probability averaging) | 62.17 ± 0.25 | 0.261 ± 0.003 | 0.647 ± 0.001 |
+
+```bash
+# average / task-agnostic fusion
+for ab in avg_fusion ta_fusion; do
+  for s in 42 123 2024; do
+    python -m train.train_single --model magcaf_v2 --ablate $ab \
+      --model-cfg use_landmark=True --seed $s --epochs 20 \
+      --run-dir runs/pilot/fusion_${ab}__s${s}
+  done
+done
+# late fusion: per seed, average the predictions.npz probabilities of the
+# lrcn__ce / timesformer__ce / videomae__ce runs and re-score.
+```
+
 ## Citation
 
 If you use this code, please cite our paper.

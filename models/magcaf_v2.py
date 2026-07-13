@@ -188,8 +188,55 @@ class _LandmarkEncoder(nn.Module):
         return self.out_proj(pooled)
 
 
+class _AvgFusion(nn.Module):
+    """`ablate=avg_fusion`: task-agnostic average of the projected sources."""
+    def __init__(self, cfg: MAGCAFv2Config):
+        super().__init__()
+        D = cfg.d_model
+        self.K = cfg.num_tasks
+        self.use_aux = cfg.use_flow or cfg.use_landmark
+        self.src_norm_s = nn.LayerNorm(cfg.d_spatial)
+        self.src_norm_v = nn.LayerNorm(cfg.d_videomae)
+        self.src_norm_t = nn.LayerNorm(cfg.d_timesformer)
+        self.proj_s = nn.Linear(cfg.d_spatial,     D)
+        self.proj_v = nn.Linear(cfg.d_videomae,    D)
+        self.proj_t = nn.Linear(cfg.d_timesformer, D)
+        if self.use_aux:
+            d_aux = cfg.d_flow if cfg.use_flow else cfg.d_landmark
+            self.src_norm_aux = nn.LayerNorm(d_aux)
+            self.proj_aux = nn.Linear(d_aux, D)
+        self.norm = nn.LayerNorm(D)
+        self.drop = nn.Dropout(cfg.dropout)
+
+    def forward(self, h_s, h_v, h_t, h_aux=None):
+        hs = self.proj_s(self.src_norm_s(h_s))
+        hv = self.proj_v(self.src_norm_v(h_v))
+        ht = self.proj_t(self.src_norm_t(h_t))
+        srcs = [hs, hv, ht]
+        if self.use_aux:
+            assert h_aux is not None, "aux feature missing"
+            srcs.append(self.proj_aux(self.src_norm_aux(h_aux)))
+        x = torch.stack(srcs, dim=1).mean(1)
+        x = self.drop(self.norm(x))
+        fused = x.unsqueeze(1).expand(-1, self.K, -1)
+        return fused, {"attn": None, "gate": None}
+
+
+class _TaskAgnosticFusion(_MultiSourceFusion):
+    """`ablate=ta_fusion`: gated cross-attention with ONE query/gate shared by all tasks."""
+    def __init__(self, cfg: MAGCAFv2Config):
+        import dataclasses
+        super().__init__(dataclasses.replace(cfg, num_tasks=1))
+        self.K_out = cfg.num_tasks
+
+    def forward(self, h_s, h_v, h_t, h_aux=None):
+        fused, out = super().forward(h_s, h_v, h_t, h_aux)     # (B, 1, D)
+        return fused.expand(-1, self.K_out, -1), out
+
+
 class MAGCAFv2Net(nn.Module):
-    VALID_ABLATES = (None, "no_magcaf", "no_omega", "no_uw")
+    VALID_ABLATES = (None, "no_magcaf", "no_omega", "no_uw",
+                     "avg_fusion", "ta_fusion")
 
     def __init__(self, cfg: MAGCAFv2Config | None = None,
                  omega_prior: torch.Tensor | None = None,
@@ -235,9 +282,14 @@ class MAGCAFv2Net(nn.Module):
             num_tasks=cfg.num_tasks, num_classes=cfg.num_classes,
             use_landmark=cfg.use_landmark, num_landmarks=cfg.num_landmarks,
         )
-        self.fusion = (_ConcatFusion(cfg_eff)
-                       if (ablate and "no_magcaf" in ablate)
-                       else _MultiSourceFusion(cfg_eff))
+        if ablate and "no_magcaf" in ablate:
+            self.fusion = _ConcatFusion(cfg_eff)
+        elif ablate == "avg_fusion":
+            self.fusion = _AvgFusion(cfg_eff)
+        elif ablate == "ta_fusion":
+            self.fusion = _TaskAgnosticFusion(cfg_eff)
+        else:
+            self.fusion = _MultiSourceFusion(cfg_eff)
 
         self.heads = nn.ModuleList([
             nn.Sequential(

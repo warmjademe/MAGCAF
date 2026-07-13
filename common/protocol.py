@@ -37,7 +37,8 @@ class ProtocolConfig:
         "DAISEE_FLOW_CACHE", "/home/qyb/datasets/DAiSEE/flow_cache"
     )
 
-    # Clip shape (Plan C: uniform 16-frame sampling across the 10s clip)
+    # Clip shape: decode at 10 FPS, take the first 16 frames per clip
+    # (i.e. the leading 1.6 s of the 10 s clip; see preprocess_clip._sample_frames)
     fps: int = 10
     clip_frames: int = 16
     face_size: int = 224

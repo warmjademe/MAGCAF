@@ -21,7 +21,11 @@ class LDAMLoss(nn.Module):
         m = m * (max_m / np.max(m))
         self.register_buffer("m_list", torch.tensor(m, dtype=torch.float))
         self.scale = scale
-        self.weight = weight
+        # Register weight as buffer so it follows the module to CUDA on .to().
+        if weight is not None:
+            self.register_buffer("weight", weight.detach().clone().float())
+        else:
+            self.weight = None
 
     def forward(self, logits: torch.Tensor, target: torch.Tensor) -> torch.Tensor:
         idx = torch.zeros_like(logits, dtype=torch.bool)
